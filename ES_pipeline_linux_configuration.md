@@ -8,7 +8,7 @@
 - sudo mkdir -p /mnt/hgfs
 
 
-# add this line to /etc/fstab for auto nount
+# add this line to /etc/fstab for auto mount
 .host:/ /mnt/hgfs fuse.vmhgfs-fuse	auto,allow_other	0	0
 
 
