@@ -1,5 +1,53 @@
-# Today is 15th of August 2025
-# I want to make note for recovery of ES pipeline
+# Enabling sharefolder
+## requirement: open-vm-tools
+sudo apt update && sudo apt install open-vm-tools open-vm-tools-desktop
+sudo mkdir -p /mnt/hgfs
+
+
+# add this line to /etc/fstab for auto nount
+.host:/ /mnt/hgfs fuse.vmhgfs-fuse	auto,allow_other	0	0
+
+
+# Customize terminal to be full screen at startup and have increase font size
+right click on terminal > preferences > initial terminal size 240 * 100 // font 16 //
+
+
+# Install tree for better view of files and directories
+sudo apt-get install tree
+
+
+# Installing make 
+sudo apt-get install build-essential
+sudo apt-get install cmake
+
+
+# Installing git 
+sudo apt-get install git
+sudo add-apt-repository ppa:git-core/ppa
+sudo apt update; sudo apt install git
+
+
+# Installing curl
+sudo snap install curl
+
+
+# Installing full version of vim // text editor
+sudo apt install vim-gtk3
+
+
+# Installing plocate // for searching whole systemfiles 
+sudo apt install plocate
+- each time before use --> sudo updatedb
+
+
+# Installing htop // for better view of processes and whole system load and status
+sudo apt install htop
+
+
+# Install pigz for more efficient compression of files // more efficient that gzip
+sudo apt install pigz
+
+
 # my prefered path for programs like fastqc --> /opt
 
 # FastQC
@@ -43,17 +91,13 @@ sudo make
 
 # GATK
 - requirements:(for run) Java 17 // Python 3.10.13 // R 4.3.1
-- I have installed Java 21 BUT faced an error for requiring Java 17
 
 ## Java installation
 sudo apt update
 sudo apt install openjdk-17-jdk
 
-- Again faced an error despite i have installed Java 17 as well as Java 21 
-- Solution --> switch between different versions of Java // I can change it to java 21 whenever I want 
-sudo apt install java-common
-sudo update-java-alternatives --list # set to java 17
-sudo update-java-alternatives --set <version-name>
+
+- requirements:(for build) Java 17 JDK // Git 2.5 // git-lfs // Gradle 5.6. // R 4.3.1 // conda (between Anaconda and Miniconda,I chose Anaconda but it was wrong, best way is miniconda that is same version of gatk development)
 
 ## git-lfs
 gwet https://github.com/git-lfs/git-lfs/releases/download/v3.7.0/git-lfs-linux-amd64-v3.7.0.tar.gz
@@ -61,28 +105,6 @@ tar xvzf git-lfs-linux-amd64-v3.7.0.tar.gz
 cd git-lfs-3.7.0/
 sudo ./install.sh
 
-
-## R installation
-sudo apt update -qq
-sudo apt install --no-install-recommends software-properties-common dirmngr
-wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-sudo apt install --no-install-recommends r-base
-
-## R Libraries
-
-- r-base=4.3.1
-- r-data.table=1.14.8
-- r-dplyr=1.1.3
-- r-getopt=1.20.4
-- r-ggplot2=3.4.4
-- r-gplots=3.1.3
-- r-gsalib=2.2.1
-- r-optparse=1.7.3
-- r-backports=1.4.1
-
-
-## requirements:(for build) Java 17 JDK // Git 2.5 // git-lfs // Gradle 5.6. // R 4.3.1 // conda (between Anaconda and Miniconda,I chose Anaconda but it was wrong, best way is miniconda that is same version of gatk development)
 
 " GATK4 uses the Conda package manager to establish and manage the Python environment and dependencies required by Python-based GATK tools. This environment also includes the R dependencies used for plotting in some of the tools. "
 
@@ -95,6 +117,10 @@ conda config --set auto_update_conda false
 - set solver to be mamba
 conda config --set solver libmamba
 
+- install environment dependencies with ES_pipeline_env_configuration.yml file
+conda env update --name base --file ES_pipeline_env_configuration.yml
+ 
+
 # ./gradlew in build will install Gradle 5.6. automatically
 
 # building GATK
@@ -103,15 +129,8 @@ sudo git clone https://github.com/broadinstitute/gatk.git
 cd gatk-4.6.2.0/
 sudo ./gradlew
 
-# add gatk to path
-sudo nano .bashrc
-export PATH="$PATH:/opt/gatk/"
-source .bashrc
 
-######## gatk installation is done
-
-
-# Installing samtools
+# Installing samtools, htslib, bedtools
 - download from offitial website: htslib.org/download/
 - extract via --> tar -xvjf 
 - requirenemt: 
@@ -123,4 +142,15 @@ source .bashrc
 	- sudo apt-get install libncurses5-dev
 - sudo ./configure
 - sudo make
-- sudo make install  
+- sudo make install 
+
+
+# Installing annovar
+- register on website and download annovar.latest.tar.gz  
+- extract annovar.latest.tar.gz in /opt directory (you must have sudo permission)
+- mv example/ and humandb/ directories to ngsdb/annovar_data/
+- edit ~/.bashrc and add this alias:
+	- export PATH="$PATH:/opt/annovar/"
+- download data with annovar_data_download_script.sh
+
+
