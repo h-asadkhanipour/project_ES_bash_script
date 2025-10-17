@@ -1,6 +1,6 @@
-##############################################################################
+###############################################################################
 # Linux general configuration
-##############################################################################
+###############################################################################
 
 # Enabling sharefolder
 - requirement: open-vm-tools
@@ -41,11 +41,13 @@ right click on terminal > preferences > initial terminal size 240 * 100 // font 
 - each time before use --> sudo updatedb
 
 
-# Installing htop // for better view of processes and whole system load and status // optional
+# Installing htop // 
+# for better view of processes and whole system load and status // optional
 - sudo apt install htop
 
 
-# Install pigz for more efficient compression of files // more efficient that gzip
+# Install pigz for more efficient compression of files // 
+# more efficient that gzip
 - sudo apt install pigz
 
 
@@ -161,3 +163,6 @@ right click on terminal > preferences > initial terminal size 240 * 100 // font 
 - download data with annovar_data_download_script.sh
 
 
+# Installing igv genome browser
+- prebuilt version is available in <https://igv.org/doc/desktop/#DownloadPage/>
+- add it to path
