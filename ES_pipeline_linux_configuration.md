@@ -7,8 +7,7 @@
 - sudo apt update && sudo apt install open-vm-tools open-vm-tools-desktop
 - sudo mkdir -p /mnt/hgfs
 
-
-# add this line to /etc/fstab for auto mount
+- add this line to /etc/fstab for auto mount
 .host:/ /mnt/hgfs fuse.vmhgfs-fuse	auto,allow_other	0	0
 
 

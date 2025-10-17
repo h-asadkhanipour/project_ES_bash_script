@@ -468,11 +468,9 @@ if [ $annotate == y ]; then
 			--outfile ${sample_dir}/annotation_filtering/after_anno.vcf \
 			--vcfinput \
 			--nastring . \
-			--protocol  refGene,knownGene,ensGene,dbnsfp47a,\
-			intervar_20250721,logofunc,gnomad41_exome,regeneron,\
-			allofus,revel,avsnp151,clinvar_20250721
+			--protocol  refGene,knownGene,ensGene,dbnsfp47a,intervar_20250721,logofunc,gnomad41_exome,regeneron,allofus,revel,avsnp151,clinvar_20250721
 			--operation gx,g,g,f,f,f,f,f,f,f,f,f \
-			-xref ${annovar_data}/example/gene_xref.	
+			-xref ${annovar_data}/example/gene_xref.txt
 
 		echo " Annotation is done "
 	fi
