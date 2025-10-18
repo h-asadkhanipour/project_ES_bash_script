@@ -204,7 +204,8 @@ if [ $a_proceed == y ]; then
 	else
 		bwa mem \
 			-t $threads \
-			-M $reference_hg38 ${sample_dir}/fastq_after_QC/read_1.fastq.gz \
+		    $reference_hg38 \
+            ${sample_dir}/fastq_after_QC/read_1.fastq.gz \
 			${sample_dir}/fastq_after_QC/read_2.fastq.gz \
 			> ${sample_dir}/alignment_postalignment/aligned.sam
 		echo " Alignment has been done and sam file has been generated "
@@ -242,7 +243,7 @@ if [ $pa_proceed == y ]; then
 		gatk MarkDuplicates \
 			-I ${sample_dir}/alignment_postalignment/after_rg.bam \
 			-O ${sample_dir}/alignment_postalignment/after_md.bam \
-			-M ${sample_dir}/alignment_postalignment/report_md.text
+			-M ${sample_dir}/alignment_postalignment/report_md.txt
 
 		echo " gatk MarkDuplicates has done "
 		
@@ -273,53 +274,53 @@ read -p " Do you wanna generate post alignment QC reports? (Press y/n): " pa_qc_
 if [ $pa_qc_choice == y ]; then
 	gatk CollectAlignmentSummaryMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-casm.text \
+		-O ${sample_dir}/alignment_postalignment/report-casm.txt \
 		-R $reference_hg38
 
 	gatk CollectQualityYieldMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cqym.text \
+		-O ${sample_dir}/alignment_postalignment/report-cqym.txt \
 		-R $reference_hg38
 	
 	gatk CollectBaseDistributionByCycle \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cbdbc.text \
+		-O ${sample_dir}/alignment_postalignment/report-cbdbc.txt \
 		-R $reference_hg38 \
 		-CHART ${sample_dir}/alignment_postalignment/report-cbdbc.pdf
 	
 	gatk CollectGcBiasMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cgcbm.text \
+		-O ${sample_dir}/alignment_postalignment/report-cgcbm.txt \
 		-R $reference_hg38 \
 		-CHART ${sample_dir}/alignment_postalignment/report-cgcbm.pdf \
-		-S ${sample_dir}/alignment_postalignment/report-cgcbm_s.text
+		-S ${sample_dir}/alignment_postalignment/report-cgcbm_s.txt
 	
 	gatk CollectInsertSizeMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cism.text \
+		-O ${sample_dir}/alignment_postalignment/report-cism.txt \
 		-R $reference_hg38 \
 		-H ${sample_dir}/alignment_postalignment/report-cism.pdf \
 		-M 0.05
 	
 	gatk CollectOxoGMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cogm.text \
+		-O ${sample_dir}/alignment_postalignment/report-cogm.txt \
 		-R $reference_hg38 
 
 	gatk MeanQualityByCycle \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-mqbc.text \
+		-O ${sample_dir}/alignment_postalignment/report-mqbc.txt \
 		-R $reference_hg38 \
 		-CHART ${sample_dir}/alignment_postalignment/report-mqbc.pdf
 
 	gatk CollectJumpingLibraryMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-cjlm.text \
+		-O ${sample_dir}/alignment_postalignment/report-cjlm.txt \
 		-R $reference_hg38
 
 	gatk CollectSequencingArtifactMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/report-csam.text \
+		-O ${sample_dir}/alignment_postalignment/report-csam.txt \
 		-R $reference_hg38
 
 	echo " All post alignment quality control has been done "
@@ -440,7 +441,7 @@ if [ $raw_vcf_qc == y ]; then
 
 	bcftools stats \
 		${sample_dir}/raw_vcf/after-vqsr-snp.vcf  \
-		> ${sample_dir}/raw_vcf/report-bcftools-snp.text 
+		> ${sample_dir}/raw_vcf/report-bcftools-snp.txt 
 
 	# validatevariants only runs if something goes wrong it will show error, else it only runs
 	gatk ValidateVariants \
