@@ -15,7 +15,7 @@
 # set tranch filter level after vqsr
 ###############################################################################
 
-sample_dir="/mnt/hgfs/sharefolder/project_ES_Sana/"
+sample_dir="/mnt/hgfs/sharefolder/project_ES_Sana"
 ngsdb="/mnt/hgfs/sharefolder/ngsdb"
 threads=12
 tranch_filter_level=99
@@ -36,7 +36,7 @@ vqsr_dbsnp="$ngsdb/gatk-hg38/Homo_sapiens_assembly38.dbsnp138.vcf"
 vqsr_mills_indel="$ngsdb/gatk-hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
 vqsr_axion="$ngsdb/gatk-hg38/Axiom_Exome_Plus.genotypes.all_populations.poly.hg38.vcf.gz"
 
-annovar_data="~/annovar_data/"
+annovar_data="/home/happy/annovar_data/"
 
 ###############################################################################
 # Creating the FASTA sequence dictionary and index file 
