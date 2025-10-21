@@ -181,7 +181,7 @@ fi
 # clinvar_20250721 file size is 52MB and after extraction is 737MB
 
 # Total size of data for downloading is: 49GB
-# Totalo size of data after extraction is: 258GB 
+# Total size of data after extraction is: 258GB 
 
 
 ##############################################################################

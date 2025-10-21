@@ -15,7 +15,7 @@
 # set tranch filter level after vqsr
 ###############################################################################
 
-sample_dir="/mnt/hgfs/sharefolder/test"
+sample_dir="/mnt/hgfs/sharefolder/project_ES_Sana/"
 ngsdb="/mnt/hgfs/sharefolder/ngsdb"
 threads=12
 tranch_filter_level=99
@@ -36,7 +36,7 @@ vqsr_dbsnp="$ngsdb/gatk-hg38/Homo_sapiens_assembly38.dbsnp138.vcf"
 vqsr_mills_indel="$ngsdb/gatk-hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
 vqsr_axion="$ngsdb/gatk-hg38/Axiom_Exome_Plus.genotypes.all_populations.poly.hg38.vcf.gz"
 
-annovar_data="~/annovar_data/humandb/"
+annovar_data="~/annovar_data/"
 
 ###############################################################################
 # Creating the FASTA sequence dictionary and index file 
@@ -193,13 +193,15 @@ fi
 
 
 ###############################################################################
-# alignment and post alignment 
+# Data pre processing
+# alignment, post alignment and BQSR
 ###############################################################################
 # alignment
 echo " Estimated time of alignment is 1 hour "
 read -p " Do you want to proceed? (Press y): " a_proceed
 if [ $a_proceed == y ]; then
-	if [ -f "${sample_dir}/alignment_postalignment/aligned.sam" ]; then
+	if [ -f "${sample_dir}/alignment_postalignment/aligned.sam" ] || \
+      [ -f "${sample_dir}/alignment_postalignment/after_md.bam" ]; then
 		echo " Sam file has been generated already "
 	else
 		bwa mem \
@@ -329,87 +331,104 @@ else
 fi
 
 
-###############################################################################
-# BQSR // VQSR 
-###############################################################################
-# BQSR
+# BQSR 
 echo " BQSR estimated time is 40 minutes "
 read -p " Do you wanna proceed? (Press y/n): " bqsr_proceed
 if [ $bqsr_proceed == y ]; then
-	gatk BaseRecalibrator \
-		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-O ${sample_dir}/alignment_postalignment/bqsr_1.recall \
-		-R $reference_hg38 \
-		--known-sites $bqsr_omni \
-		--known-sites $bqsr_dbsnp \
-		--known-sites $bqsr_hapmap \
-		--known-sites $bqsr_known_indel \
-		--known-sites $bqsr_mills_indel
+	if [ -f "${sample_dir}/alignment_postalignment/report-bqsr.csv" ]; then
+        echo " BQSR has been done already "
+    else
+        gatk BaseRecalibrator \
+            -I ${sample_dir}/alignment_postalignment/after_md.bam \
+            -O ${sample_dir}/alignment_postalignment/bqsr_1.recall \
+            -R $reference_hg38 \
+            --known-sites $bqsr_omni \
+            --known-sites $bqsr_dbsnp \
+            --known-sites $bqsr_hapmap \
+            --known-sites $bqsr_known_indel \
+            --known-sites $bqsr_mills_indel
 
-	gatk ApplyBQSR \
-		-I ${sample_dir}/alignment_postalignment/after_md.bam \
-		-bqsr ${sample_dir}/alignment_postalignment/bqsr_1.recall \
-		-O ${sample_dir}/alignment_postalignment/after_bqsr.bam \
-		-R $reference_hg38 
+        gatk ApplyBQSR \
+            -I ${sample_dir}/alignment_postalignment/after_md.bam \
+            -bqsr ${sample_dir}/alignment_postalignment/bqsr_1.recall \
+            -O ${sample_dir}/alignment_postalignment/after_bqsr.bam \
+            -R $reference_hg38 
 
-	gatk BaseRecalibrator \
-		-I ${sample_dir}/alignment_postalignment/after_bqsr.bam \
-		-O ${sample_dir}/alignment_postalignment/bqsr_2.recall \
-		-R $reference_hg38 \
-		--known-sites $bqsr_omni \
-		--known-sites $bqsr_dbsnp \
-		--known-sites $bqsr_hapmap \
-		--known-sites $bqsr_known_indel \
-		--known-sites $bqsr_mills_indel
+        gatk BaseRecalibrator \
+            -I ${sample_dir}/alignment_postalignment/after_bqsr.bam \
+            -O ${sample_dir}/alignment_postalignment/bqsr_2.recall \
+            -R $reference_hg38 \
+            --known-sites $bqsr_omni \
+            --known-sites $bqsr_dbsnp \
+            --known-sites $bqsr_hapmap \
+            --known-sites $bqsr_known_indel \
+            --known-sites $bqsr_mills_indel
 
-	gatk AnalyzeCovariates \
-		-before ${sample_dir}/alignment_postalignment/bqsr_1.recall \
-		-after ${sample_dir}/alignment_postalignment/bqsr_2.recall \
-		-plots ${sample_dir}/alignment_postalignment/report-bqsr.pdf \
-		-csv ${sample_dir}/alignment_postalignment/report-bqsr.csv 
+        gatk AnalyzeCovariates \
+            -before ${sample_dir}/alignment_postalignment/bqsr_1.recall \
+            -after ${sample_dir}/alignment_postalignment/bqsr_2.recall \
+            -plots ${sample_dir}/alignment_postalignment/report-bqsr.pdf \
+            -csv ${sample_dir}/alignment_postalignment/report-bqsr.csv 
 
-	echo "BQSR is done"
+        echo "BQSR is done"
+    fi
 else
 	exit
 fi
 
 
+###############################################################################
 # variant calling with gatk HaplotypeCaller
+###############################################################################
 echo " HaplotypeCaller estimated time is 1 hour "
 read -p " Do you want to do variant calling? (Press y/n): " hc_proceed
 if [ $hc_proceed == y ]; then
-	gatk HaplotypeCaller \
-		-I ${sample_dir}/alignment_postalignment/after_bqsr.bam \
-		-O ${sample_dir}/raw_vcf/raw_vcf.vcf \
-		-R $reference_hg38
+	if [ -f "${sample_dir}/raw_vcf/raw_vcf.vcf" ]; then
+        echo " variant calling has been done already "
+    else
+        gatk HaplotypeCaller \
+            -I ${sample_dir}/alignment_postalignment/after_bqsr.bam \
+            -O ${sample_dir}/raw_vcf/raw_vcf.vcf \
+            -R $reference_hg38
+        echo " variant calling is done "
+    fi
 else
 	exit
 fi
 
 
+###############################################################################
+# VQSR
+############################################################################### 
 # VQSR-SNP
 read -p " Do you want to do VQSR? (Press y/n): " vqsr_proceed
 if [ $vqsr_proceed == y ]; then
-	gatk VariantRecalibrator \
-		-mode SNP \
-		-V ${sample_dir}/raw_vcf/raw_vcf.vcf \
-		-O ${sample_dir}/raw_vcf/vqsr-snp.vcf \
-		-R $reference_hg38 \
-		--tranches-file ${sample_dir}/raw_vcf/snp-tranch.tranches \
-		-tranche 100 \
-		-tranche 99.9 \
-		-tranche 99 \
-		-tranche 90 \
-		-an QD \
-		-an MQ \
-		-an MQRankSum \
-		-an ReadPosRankSum \
-		-an FS \
-		-an SOR \
-		--rscript-file ${sample_dir}/raw_vcf/report-vqsr-snp.R \
-		--resource:hapmap,truth=true,training=true,known=false,prior=15 $vqsr_hapmap \
-		--resource:omni,truth=true,training=true,known=false,prior=12 $vqsr_omni \
-		--resource:dbsnp,truth=false,training=false,known=true,prior=2 $vqsr_dbsnp
+    if [ -f "${sample_dir}/raw_vcf/vqsr-snp.vcf" ]; then
+        echo " VQSR has been done already "
+    else
+        gatk VariantRecalibrator \
+            -mode SNP \
+            -V ${sample_dir}/raw_vcf/raw_vcf.vcf \
+            -O ${sample_dir}/raw_vcf/vqsr-snp.vcf \
+            -R $reference_hg38 \
+            --tranches-file ${sample_dir}/raw_vcf/snp-tranch.tranches \
+            -tranche 100 \
+            -tranche 99.9 \
+            -tranche 99 \
+            -tranche 90 \
+            -an QD \
+            -an MQ \
+            -an MQRankSum \
+            -an ReadPosRankSum \
+            -an FS \
+            -an SOR \
+            --rscript-file ${sample_dir}/raw_vcf/report-vqsr-snp.R \
+            --resource:hapmap,truth=true,training=true,known=false,prior=15 $vqsr_hapmap \
+            --resource:omni,truth=true,training=true,known=false,prior=12 $vqsr_omni \
+            --resource:dbsnp,truth=false,training=false,known=true,prior=2 $vqsr_dbsnp
+        
+        echo " VQSR has been done already "
+    fi
 else
 	exit
 fi
@@ -417,39 +436,47 @@ fi
 
 read -p " Please check tranche files and set tranch_filter_level (Enter 'set' to continue): " avqsr_proceed
 if [ $avqsr_proceed == set ]; then
-	gatk ApplyVQSR \
-		-mode SNP \
-		-V ${sample_dir}/raw_vcf/raw_vcf.vcf \
-		--recal-file ${sample_dir}/raw_vcf/vqsr-snp.vcf \
-		--tranches-file ${sample_dir}/raw_vcf/snp-tranch.tranches \
-		-ts-filter-level $tranch_filter_level \
-		-O ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
-	echo " ApplyVQSR has been done "
-	echo " Your vcf is ready for annotation "	
+    if [ -f "${sample_dir}/raw_vcf/after-vqsr-snp.vcf" ]; then
+        echo " ApplyVQSR has been done already "
+    else
+        gatk ApplyVQSR \
+            -mode SNP \
+            -V ${sample_dir}/raw_vcf/raw_vcf.vcf \
+            --recal-file ${sample_dir}/raw_vcf/vqsr-snp.vcf \
+            --tranches-file ${sample_dir}/raw_vcf/snp-tranch.tranches \
+            -ts-filter-level $tranch_filter_level \
+            -O ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
+        echo " ApplyVQSR has been done "
+        echo " Your vcf is ready for annotation "	
+    fi
 else
 	exit
 fi
 
 
-##############################################################################
+###############################################################################
 # variants check 
-##############################################################################
+###############################################################################
 read -p " Do you want to generate report of variants in raw vcf? (Press y/n): " raw_vcf_qc
 if [ $raw_vcf_qc == y ]; then
-	gatk CountVariants \
-		-V ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
+    if [ -f "${sample_dir}/raw_vcf/report-bcftools-snp.txt" ]; then
+        echo " Reports of raw vcf variants are ready "
+    else
+        gatk CountVariants \
+            -V ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
 
-	bcftools stats \
-		${sample_dir}/raw_vcf/after-vqsr-snp.vcf  \
-		> ${sample_dir}/raw_vcf/report-bcftools-snp.txt 
+        bcftools stats \
+            ${sample_dir}/raw_vcf/after-vqsr-snp.vcf  \
+            > ${sample_dir}/raw_vcf/report-bcftools-snp.txt 
 
-	# validatevariants only runs if something goes wrong it will show error, else it only runs
-	gatk ValidateVariants \
-		-V ${sample_dir}/raw_vcf/after-vqsr-snp.vcf \
-		-R $reference_hg38 \
-		--dbsnp $bqsr_dbsnp
-	
-	echo " raw vcf is fine and reports are ready in ${sample_dir}/raw_vcf/ "
+        # validatevariants only runs if something goes wrong it will show error, else it only runs
+        gatk ValidateVariants \
+            -V ${sample_dir}/raw_vcf/after-vqsr-snp.vcf \
+            -R $reference_hg38 \
+            --dbsnp $bqsr_dbsnp
+        
+        echo " raw vcf is fine and reports are ready in ${sample_dir}/raw_vcf/ "
+   fi
 fi
 
 
@@ -459,21 +486,23 @@ fi
 echo " Annotation time is 45 minutes "
 read -p " Do you want to annotate raw vcf by dafault options? (Press y/n): " annotate
 if [ $annotate == y ]; then
-	if [ -f ${sample_dir}/annotation_filtering/after_anno.vcf]; then
+	if [ -f ${sample_dir}/annotation_filtering/after_anno.vcf ]; then
 		echo " Annotated vcf has been generate already "
 	else
 		table_annovar.pl \
 			${sample_dir}/raw_vcf/after-vqsr-snp.vcf \
-			${annovar_data}/humandb/ \
-			-v \
+            ${annovar_data}/humandb/ \
+            -v \
 			--remove \
 			--buildver hg38 \
 			--outfile ${sample_dir}/annotation_filtering/after_anno.vcf \
 			--vcfinput \
 			--nastring . \
-			--protocol  refGene,knownGene,ensGene,dbnsfp47a,intervar_20250721,logofunc,gnomad41_exome,regeneron,allofus,revel,avsnp151,clinvar_20250721
+			--protocol  refGene,knownGene,ensGene,dbnsfp47a,intervar_20250721,logofunc,gnomad41_exome,regeneron,allofus,revel,avsnp151,clinvar_20250721 \
 			--operation gx,g,g,f,f,f,f,f,f,f,f,f \
-			-xref ${annovar_data}/example/gene_xref.txt
+			--xreffile ${annovar_data}/example/gene_xref.txt \
+            --thread $threads \
+            --nopolish
 
 		echo " Annotation is done "
 	fi
