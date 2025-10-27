@@ -53,7 +53,7 @@ if [ -f "$reference_hg38.fai" ]; then
 	echo " Index for samtools has been made already "
 else
 	samtools faidx $reference_hg38
-	echo " samtools made index for reference sequence "
+	echo " samtools has made index for reference sequence "
 fi
 
 
@@ -145,17 +145,17 @@ if find ${sample_dir}/raw_data/ -type f -name "*fastqc*" | grep -q fastqc; then
 	echo " FastQC reports are ready "
 else
 	fastqc -q -t $threads ${sample_dir}/raw_data/*.gz
-       	echo " FastQC reports has been generated "
+    echo " FastQC reports has been generated "
 fi
 
 echo " Raw fastq quality control: "
 echo " Check fastQC reports in ${sample_dir}/raw_data/"
-echo " Enter 'yes' if raw fastq QC is ok "
-read -p " Enter 'done' if you have done trimming manually " qc_is_ok
+read -p " Do you want to proceed, if raw fastq QC is ok (Press y/n)" qc_is_ok
+read -p " Enter 'done' if you have done trimming manually " trimming_is_done
 
 
 # simple fastp output // no trimming // removing low quality reads and reads with length below fastp defualt 
-if [ $qc_is_ok == yes ]; then
+if [ $qc_is_ok == y ]; then
 	if find ${sample_dir}/fastq_after_QC/ -type f -name "*report*" | grep -q report; then
 		echo " fastp reports are ready "
 	else
@@ -177,7 +177,7 @@ if [ $qc_is_ok == yes ]; then
 		echo " FastQC reports after fastp has been generated "
 	fi
 	echo " fastp report and FastQC after fastp available in ${sample_dir}/fasq_after_qc/ directory"
-elif [ $qc_is_ok == done ]; then
+elif [ $trimming_is_done == done ]; then
 	if find ${sample_dir}/fastq_after_QC/ -type f -name "*report*" | grep -q report; then
 		echo " fastp reports are ready "
 		echo " Continue "
@@ -197,33 +197,35 @@ fi
 # alignment, post alignment and BQSR
 ###############################################################################
 # alignment
-echo " Estimated time of alignment is 1 hour "
-read -p " Do you want to proceed? (Press y): " a_proceed
-if [ $a_proceed == y ]; then
-	if [ -f "${sample_dir}/alignment_postalignment/aligned.sam" ] || \
-      [ -f "${sample_dir}/alignment_postalignment/after_md.bam" ]; then
-		echo " Sam file has been generated already "
-	else
-		bwa mem \
+if [ -f "${sample_dir}/alignment_postalignment/aligned.sam" ] || \
+  [ -f "${sample_dir}/alignment_postalignment/after_md.bam" ]; then
+    echo " Sam file has been generated already "
+else
+    echo " Estimated time of alignment is 1 hour "
+    read -p " Do you want to proceed? (Press y/n): " a_proceed
+
+    if [ $a_proceed == y ]; then
+            bwa mem \
 			-t $threads \
 		    $reference_hg38 \
             ${sample_dir}/fastq_after_QC/read_1.fastq.gz \
 			${sample_dir}/fastq_after_QC/read_2.fastq.gz \
 			> ${sample_dir}/alignment_postalignment/aligned.sam
 		echo " Alignment has been done and sam file has been generated "
+    else
+        exit
 	fi
-else
-	exit
 fi
 
 
 # post alignment 
-echo " Estimated time of post alignment processes is 25 minutes "
-read -p " Do you want to proceed? (Press y): " pa_proceed
-if [ $pa_proceed == y ]; then
-	if [ -f "${sample_dir}/alignment_postalignment/after_md.bai" ]; then
-		echo " Post alignment processes has been done already "
-	else
+if [ -f "${sample_dir}/alignment_postalignment/after_md.bai" ]; then
+    echo " Post alignment processes has been done already "
+else
+    echo " Estimated time of post alignment processes is 25 minutes "
+    read -p " Do you want to proceed? (Press y/n): " pa_proceed
+
+    if [ $pa_proceed == y ]; then
 		gatk SortSam \
 			-I ${sample_dir}/alignment_postalignment/aligned.sam \
 			-O ${sample_dir}/alignment_postalignment/after_sort.bam \
@@ -254,9 +256,9 @@ if [ $pa_proceed == y ]; then
 			-O ${sample_dir}/alignment_postalignment/after_md.bai
 
 		echo " gatk BuildBamIndex has done "
+    else
+	    exit
 	fi
-else
-	exit
 fi
 
 
@@ -272,8 +274,8 @@ fi
 
 
 # alignment quality control 
-read -p " Do you wanna generate post alignment QC reports? (Press y/n): " pa_qc_choice
-if [ $pa_qc_choice == y ]; then
+read -p " Do you wanna skip post alignment QC reports? (Press y/n): " pa_qc_choice
+if [ $pa_qc_choice == n ]; then
 	gatk CollectAlignmentSummaryMetrics \
 		-I ${sample_dir}/alignment_postalignment/after_md.bam \
 		-O ${sample_dir}/alignment_postalignment/report-casm.txt \
@@ -332,12 +334,13 @@ fi
 
 
 # BQSR 
-echo " BQSR estimated time is 40 minutes "
-read -p " Do you wanna proceed? (Press y/n): " bqsr_proceed
-if [ $bqsr_proceed == y ]; then
-	if [ -f "${sample_dir}/alignment_postalignment/report-bqsr.csv" ]; then
-        echo " BQSR has been done already "
-    else
+if [ -f "${sample_dir}/alignment_postalignment/report-bqsr.csv" ]; then
+    echo " BQSR has been done already "
+else
+    echo " BQSR estimated time is 40 minutes "
+    read -p " Do you wanna proceed? (Press y/n): " bqsr_proceed
+
+    if [ $bqsr_proceed == y ]; then
         gatk BaseRecalibrator \
             -I ${sample_dir}/alignment_postalignment/after_md.bam \
             -O ${sample_dir}/alignment_postalignment/bqsr_1.recall \
@@ -371,29 +374,30 @@ if [ $bqsr_proceed == y ]; then
             -csv ${sample_dir}/alignment_postalignment/report-bqsr.csv 
 
         echo "BQSR is done"
+    else
+        exit
     fi
-else
-	exit
 fi
 
 
 ###############################################################################
 # variant calling with gatk HaplotypeCaller
 ###############################################################################
-echo " HaplotypeCaller estimated time is 1 hour "
-read -p " Do you want to do variant calling? (Press y/n): " hc_proceed
-if [ $hc_proceed == y ]; then
-	if [ -f "${sample_dir}/raw_vcf/raw_vcf.vcf" ]; then
-        echo " variant calling has been done already "
-    else
+if [ -f "${sample_dir}/raw_vcf/raw_vcf.vcf" ]; then
+    echo " variant calling has been done already "
+else
+    echo " HaplotypeCaller estimated time is 1 hour "
+    read -p " Do you want to do variant calling? (Press y/n): " hc_proceed
+
+    if [ $hc_proceed == y ]; then
         gatk HaplotypeCaller \
             -I ${sample_dir}/alignment_postalignment/after_bqsr.bam \
             -O ${sample_dir}/raw_vcf/raw_vcf.vcf \
             -R $reference_hg38
         echo " variant calling is done "
+    else
+        exit
     fi
-else
-	exit
 fi
 
 
@@ -401,11 +405,12 @@ fi
 # VQSR
 ############################################################################### 
 # VQSR-SNP
-read -p " Do you want to do VQSR? (Press y/n): " vqsr_proceed
-if [ $vqsr_proceed == y ]; then
-    if [ -f "${sample_dir}/raw_vcf/vqsr-snp.vcf" ]; then
-        echo " VQSR has been done already "
-    else
+if [ -f "${sample_dir}/raw_vcf/vqsr-snp.vcf" ]; then
+    echo " VQSR has been done already "
+else
+    read -p " Do you want to do VQSR? (Press y/n): " vqsr_proceed
+
+    if [ $vqsr_proceed == y ]; then
         gatk VariantRecalibrator \
             -mode SNP \
             -V ${sample_dir}/raw_vcf/raw_vcf.vcf \
@@ -428,17 +433,18 @@ if [ $vqsr_proceed == y ]; then
             --resource:dbsnp,truth=false,training=false,known=true,prior=2 $vqsr_dbsnp
         
         echo " VQSR has been done already "
+    else
+        exit
     fi
-else
-	exit
 fi
 
 
-read -p " Please check tranche files and set tranch_filter_level (Enter 'set' to continue): " avqsr_proceed
-if [ $avqsr_proceed == set ]; then
-    if [ -f "${sample_dir}/raw_vcf/after-vqsr-snp.vcf" ]; then
-        echo " ApplyVQSR has been done already "
-    else
+if [ -f "${sample_dir}/raw_vcf/after-vqsr-snp.vcf" ]; then
+    echo " ApplyVQSR has been done already "
+else
+    read -p " Please check tranche files and set tranch_filter_level (Enter 'set' to continue): " avqsr_proceed
+
+    if [ $avqsr_proceed == set ]; then
         gatk ApplyVQSR \
             -mode SNP \
             -V ${sample_dir}/raw_vcf/raw_vcf.vcf \
@@ -448,20 +454,21 @@ if [ $avqsr_proceed == set ]; then
             -O ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
         echo " ApplyVQSR has been done "
         echo " Your vcf is ready for annotation "	
+    else
+        exit
     fi
-else
-	exit
 fi
 
 
 ###############################################################################
 # variants check 
 ###############################################################################
-read -p " Do you want to generate report of variants in raw vcf? (Press y/n): " raw_vcf_qc
-if [ $raw_vcf_qc == y ]; then
-    if [ -f "${sample_dir}/raw_vcf/report-bcftools-snp.txt" ]; then
-        echo " Reports of raw vcf variants are ready "
-    else
+if [ -f "${sample_dir}/raw_vcf/report-bcftools-snp.txt" ]; then
+    echo " Reports of raw vcf variants are ready "
+else
+    read -p " Do you want to generate report of variants in raw vcf? (Press y/n): " raw_vcf_qc
+
+    if [ $raw_vcf_qc == y ]; then
         gatk CountVariants \
             -V ${sample_dir}/raw_vcf/after-vqsr-snp.vcf 
 
@@ -476,19 +483,22 @@ if [ $raw_vcf_qc == y ]; then
             --dbsnp $bqsr_dbsnp
         
         echo " raw vcf is fine and reports are ready in ${sample_dir}/raw_vcf/ "
-   fi
+    else
+        exit
+    fi
 fi
 
 
 ###############################################################################
 # annotation 
 ###############################################################################
-echo " Annotation time is 45 minutes "
-read -p " Do you want to annotate raw vcf by dafault options? (Press y/n): " annotate
-if [ $annotate == y ]; then
-	if [ -f ${sample_dir}/annotation_filtering/after_anno.vcf ]; then
-		echo " Annotated vcf has been generate already "
-	else
+if [ -f ${sample_dir}/annotation_filtering/after_anno.vcf.hg38_multianno.txt ]; then
+    echo " Annotated vcf has been generate already "
+else
+    echo " Annotation time is 45 minutes "
+    read -p " Do you want to annotate raw vcf by dafault options? (Press y/n): " annotate
+
+    if [ $annotate == y ]; then
 		table_annovar.pl \
 			${sample_dir}/raw_vcf/after-vqsr-snp.vcf \
             ${annovar_data}/humandb/ \
@@ -505,9 +515,9 @@ if [ $annotate == y ]; then
             --nopolish
 
 		echo " Annotation is done "
+    else
+        exit
 	fi
-else
-	exit
 fi
 
 echo " Fastq --> annotated vcf is done, now you can start filtering variants "
