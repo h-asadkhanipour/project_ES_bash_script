@@ -52,91 +52,211 @@ if [ $download_option == first ]; then
 ##############################################################################
 
 # Following data will be downloaded separately // maybe some files are not available in future
-	annotate_variation.pl -buildver hg38 -downdb refGene -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb knownGene -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb ensGene -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb dbnsfp47a -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb intervar_20250721 -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb logofunc -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb gnomad41_exome -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb regeneron -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb allofus -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb revel -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb avsnp151 -webfrom annovar $annovar_data
-	annotate_variation.pl -buildver hg38 -downdb clinvar_20250721 -webfrom annovar $annovar_data
+    if [ -f "$annovar_data/hg38_refGene.txt" ]; then
+      echo " refGene data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb refGene -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_knownGene.txt" ]; then
+      echo " knownGene data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb knownGene -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_ensGene.txt" ]; then
+      echo " ensGene data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb ensGene -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_dbnsfp47a.txt" ]; then
+      echo " dbnsfp47a data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb dbnsfp47a -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_intervar_20250721.txt" ]; then
+      echo " intervar_20250721 data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb intervar_20250721 -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_logofunc.txt" ]; then
+      echo " logofunc data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb logofunc -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_gnomad41_exome.txt" ]; then
+      echo " gnomad41_exome data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb gnomad41_exome -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_regeneron.txt" ]; then
+      echo " regeneron data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb regeneron -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_allofus.txt" ]; then
+      echo " allofus data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb allofus -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_revel.txt" ]; then
+      echo " revel data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb revel -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_avsnp151.txt" ]; then
+      echo " avsnp151 data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb avsnp151 -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_clinvar_20250721.txt" ]; then
+      echo " clinvar_20250721 data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb clinvar_20250721 -webfrom annovar $annovar_data
+    fi
+
+    if [ -f "$annovar_data/hg38_dbscsnv11.txt" ]; then
+      echo " dbscsnv11 data has been downloaded already "
+    else
+      annotate_variation.pl -buildver hg38 -downdb dbscsnv11 -webfrom annovar $annovar_data
+    fi
+
 	echo " All data has been downloaded "
 
-elif [ $download_option == second ]; then
 
 ##############################################################################
 # Second option for download - wget
 ##############################################################################
+elif [ $download_option == second ]; then
+    if [ -f "$annovar_data/hg38_refGene.txt" ]; then
+      echo " refGene data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGene.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGeneMrna.fa.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGeneVersion.txt.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGene.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGeneMrna.fa.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_refGeneVersion.txt.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_knownGene.txt" ]; then
+      echo " knownGene data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_knownGene.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_knownGeneMrna.fa.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_kgXref.txt.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_knownGene.txt.gz \
-		-P $annvar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_knownGeneMrna.fa.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_kgXref.txt.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_ensGene.txt" ]; then
+      echo " ensGene data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_ensGene.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_ensGeneMrna.fa.gz \
+          -P $annovar_data
+    fi
 
+    if [ -f "$annovar_data/hg38_dbnsfp47a.txt" ]; then
+      echo " dbnsfp47a data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbnsfp47a.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbnsfp47a.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_ensGene.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_ensGeneMrna.fa.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_intervar_20250721.txt" ]; then
+      echo " intervar_20250721 data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_intervar_20250721.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_intervar_20250721.txt.idx.gz \
+          -P $annovar_data
+    fi
 
+    if [ -f "$annovar_data/hg38_logofunc.txt" ]; then
+      echo " logofunc data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_logofunc.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_logofunc.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbnsfp47a.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbnsfp47a.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_gnomad41_exome.txt" ]; then
+      echo " gnomad41_exome data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_gnomad41_exome.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_gnomad41_exome.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_intervar_20250721.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_intervar_20250721.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_regeneron.txt" ]; then
+      echo " regeneron data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_regeneron.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_regeneron.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_logofunc.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_logofunc.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_allofus.txt" ]; then
+      echo " allofus data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_allofus.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_allofus.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_gnomad41_exome.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_gnomad41_exome.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_revel.txt" ]; then
+      echo " revel data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_revel.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_revel.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_regeneron.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_regeneron.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_avsnp151.txt" ]; then
+      echo " avsnp151 data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_avsnp151.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_avsnp151.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_allofus.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_allofus.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_clinvar_20250721.txt" ]; then
+      echo " clinvar_20250721 data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_clinvar_20250721.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_clinvar_20250721.txt.idx.gz \
+          -P $annovar_data
+    fi
 
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_revel.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_revel.txt.idx.gz \
-		-P $annovar_data
-
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_avsnp151.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_avsnp151.txt.idx.gz \
-		-P $annovar_data
-
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_clinvar_20250721.txt.gz \
-		-P $annovar_data
-	wget -c  http://www.openbioinformatics.org/annovar/download/hg38_clinvar_20250721.txt.idx.gz \
-		-P $annovar_data
+    if [ -f "$annovar_data/hg38_dbscsnv11.txt" ]; then
+      echo " dbscsnv11 data has been downloaded already "
+    else
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbscsnv11.txt.gz \
+          -P $annovar_data
+      wget -c  http://www.openbioinformatics.org/annovar/download/hg38_dbscsnv11.txt.idx.gz \
+          -P $annovar_data
+    fi
 
 	pigz -p $threads -dv ${annovar_data}/hg38*.gz
 	echo " All data has been downloaded and extracted " 
@@ -151,10 +271,12 @@ fi
 ##############################################################################
 
 ## Build,Table Name,Explanation,Date
+
 # For gene-based annotation
 ## hg38,refGene,FASTA sequences for all annotated transcripts in RefSeq Gene (last update was 2020-08-17 at UCSC),20211019
 ## hg38,knownGene,FASTA sequences for all annotated transcripts in UCSC Known Gene (last update was 2022-05-15 at UCSC),20211019
 ## hg38,ensGene,FASTA sequences for all annotated transcripts in Gencode v46 Basic collection (last update was 2024-05-13 at UCSC),20241008
+
 # For filter-based annotation
 ## hg38,dbnsfp47a,dbNSFP v4.7 academic (have more datasets compared to commercial version),20240525
 ## hg38,intervar_20250721, InterVar: clinical interpretation of missense variants (indels not supported),20250721
@@ -165,6 +287,8 @@ fi
 ## hg38,revel,REVEL scores for non-synonymous variants,20161205
 ## hg38,avsnp151,dbSNP151 with allelic splitting,20240525
 ## hg38,clinvar_20250721,Clinvar version 20250721 with separate columns for germline variants, oncogenecity variants and somatic variants),20250721
+## hg38,dbscsnv11,dbscSNV version 1.1 for splice site prediction by AdaBoost and Random Forest,20151218
+
 
 # file size for download and after extraction:
 # refGene file size is 8MB and after extraction is 25MB
@@ -179,6 +303,7 @@ fi
 # revel file size is 395MB and after extraction is 2.4GB
 # avsnp151 file size is 7.5GB and after extraction is 28GB
 # clinvar_20250721 file size is 52MB and after extraction is 737MB
+# dbscsnv11 file size is 91MB and after extraction is 573MB 
 
 # Total size of data for downloading is: 49GB
 # Total size of data after extraction is: 258GB 
@@ -190,6 +315,6 @@ fi
 # change protocol and operation according to you preferance
 ##############################################################################
 
-# protocol:  refGene,knownGene,ensGene,dbnsfp47a,intervar_20250721,logofunc,gnomad41_exome,regeneron,allofus,revel,avsnp151,clinvar_20250721
-# operation: gx,g,g,f,f,f,f,f,f,f,f,f
+# protocol:  refGene,knownGene,ensGene,dbnsfp47a,intervar_20250721,logofunc,gnomad41_exome,regeneron,allofus,revel,avsnp151,clinvar_20250721,dbscsnv11
+# operation: gx,g,g,f,f,f,f,f,f,f,f,f,f
 
